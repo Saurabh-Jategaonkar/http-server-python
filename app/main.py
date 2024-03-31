@@ -1,15 +1,22 @@
 import socket
+from concurrent.futures import ThreadPoolExecutor
 
 OK_200 = "HTTP/1.1 200 OK\r\n"
 ERR_404 = "HTTP/1.1 404 Not Found\r\n"
 
 def main():
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
-    conn, _ = server_socket.accept()  # wait for client
-    data = conn.recv(1024)
-    response = parse_msg(data)
-    print(f"response: {response}")
-    conn.send(response)
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        while True:
+            conn, _ = server_socket.accept()  # wait for client
+            executor.submit(handle_client, conn)
+
+def handle_client(conn):
+    while True:
+        data = conn.recv(1024)
+        response = parse_msg(data)
+        print(f"response: {response}")
+        conn.send(response)
 
 def parse_msg(msg: bytes):
     headers = msg.split(b"\r\n")
