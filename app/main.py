@@ -17,7 +17,8 @@ def parse_msg(msg: bytes):
     top_header_split = top_header.split(b" ")
     path = top_header_split[1]
     print(path)
-
+    content = path.decode("utf-8")
+    print(content)
     if path == b"/":
         return f"{OK_200}\r\n".encode()
     elif content.startswith("/echo/"):
